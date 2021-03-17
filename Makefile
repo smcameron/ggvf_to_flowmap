@@ -51,7 +51,7 @@ MYCFLAGS=-DPREFIX=${PREFIX} ${DEBUGFLAG} ${PROFILEFLAG} ${OPTIMIZEFLAG}\
 
 all:	ggvf_to_flowmap
 
-OBJS=ggvf_to_flowmap.o
+OBJS=ggvf_to_flowmap.o quat.o mtwist.o mathutils.o
 
 GGLIBS=-lm ${LRTLIB} -lpng
 GGLINK=$(ECHO) '  LINK' $@ && $(CC) ${MYCFLAGS} -o $@ ${OBJS} ${GGLIBS} $(LDFLAGS)
