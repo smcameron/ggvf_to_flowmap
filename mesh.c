@@ -2584,7 +2584,7 @@ int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int sub
 	if (first < 0 || first >= sphere->nvertices || last < first || last > sphere->nvertices)
 		return -1;
 
-	for (i = 0; i < last; i++) {
+	for (i = first; i < last; i++) {
 		v = &sphere->v[i];
 		union vec3 vpos;
 
