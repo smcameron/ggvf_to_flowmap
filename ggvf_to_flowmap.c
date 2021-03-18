@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <stdint.h>
 
+#include "png_utils.h"
 #include "quat.h"
 #include "mesh.h"
 
@@ -37,7 +38,7 @@ struct mesh *sphere;
 static void usage(char *msg)
 {
 	printf("ggvf_to_flowmap: %s\n", msg);
-	printf("Usage: ggvf_to_flowmap -v velocity-field-file\n");
+	printf("Usage: ggvf_to_flowmap -v velocity-field-file -f flowmap-file\n");
 	exit(1);
 }
 
@@ -129,9 +130,39 @@ static void transform_world_vector_to_tangent_space(union vec3 *world_space_vec,
 	tangent_space_output->v.y = vec3_dot(world_space_vec, bitangent);
 }
 
+static void render_flowmap_face_to_png(int face, struct flowmap *fm, char *flowmap_file)
+{
+	unsigned char *image = calloc(1, 4 * VFDIM * VFDIM);
+	int rc, i, j, p;
+	float x, y;
+	union vec2 *v;
+
+	for (i = 0; i < VFDIM; i++) {
+		for (j = 0; j < VFDIM; j++) {
+			v = &fm->v[face][i][j];
+			x = (0.5 * v->v.x + 0.5);
+			y = (0.5 * v->v.y + 0.5);
+			p = 4 * (j + VFDIM * i);
+			image[p] = (int) (255.0f * x) & 0xff;
+			image[p + 1] = (int) (255.0f * y) & 0xff;
+			image[p + 2] = 0;
+			image[p + 3] = 255;
+		}
+	}
+	rc = png_utils_write_png_image(flowmap_file, image, VFDIM, VFDIM, 1, 0);
+	if (!rc)
+		fprintf(stderr, "Failed to write png file %s\n", flowmap_file);
+}
+
 static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
 {
-	/* TODO: implement this */
+	int i;
+	char filename[PATH_MAX];
+
+	for (i = 0; i < 6; i++) {
+		sprintf(filename, "flowmap_file-%d.png", i);
+		render_flowmap_face_to_png(i, fm, filename);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -161,6 +192,8 @@ int main(int argc, char *argv[])
 
 	if (!velocity_field_file)
 		usage("velocity_field_file required");
+	if (!flowmap_file)
+		usage("flowmap-file required");
 
 	/* Allocate a ton of memory. We allocate these rather than
 	 * declaring them statically because if DIM is too large, the
