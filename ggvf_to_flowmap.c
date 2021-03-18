@@ -9,19 +9,29 @@
 #include <errno.h>
 
 #include "quat.h"
+#include "mesh.h"
 
 #define VFDIM 2048
+#define SPHERE_SUBDIVISIONS 64
 static char *velocity_field_file;
+static char *flowmap_file;
 
 static struct option long_options[] = {
 	{ "velocity-field",     required_argument, 0,  'v' },
+	{ "flow-map",     required_argument, 0,  'f' },
 	{ 0, 0, 0, 0 },
 };
+
+struct flowmap {
+        union vec2 v[6][VFDIM][VFDIM];
+} *fm;
 
 /* velocity field for 6 faces of a cubemap */
 struct velocity_field {
         union vec3 v[6][VFDIM][VFDIM];
 } *vf;
+
+struct mesh *sphere;
 
 static void usage(char *msg)
 {
@@ -64,29 +74,39 @@ static int restore_velocity_field(char *filename, struct velocity_field *vf)
 	} while (bytes_left > 0);
 	close(fd);
 	printf("Velocity field restored from %s\n", filename);
+
 	return 0;
+}
+
+static void transform_world_vector_to_tangent_space(union vec3 *world_space_vec,
+		union vec3 *tangent, union vec3 *bitangent, union vec3 *normal,
+		union vec2 *tangent_space_output)
+{
+	/* TODO: implement this */
+}
+
+static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
+{
+	/* TODO: implement this */
 }
 
 int main(int argc, char *argv[])
 {
-	int rc;
-
-	/* Allocate a ton of memory. We allocate these rather than
-	 * declaring them statically because if DIM is too large, the
-	 * static data will not fit into the .bss (see https://en.wikipedia.org/wiki/.bss)
-	 */
-	vf = calloc(1, sizeof(struct velocity_field));
+	int rc, f, i, j;
 
 	while (1) {
 
 		int option_index = 0;
 		int rc;
 
-		rc = getopt_long(argc, argv, "v:", long_options, &option_index);
+		rc = getopt_long(argc, argv, "f:v:", long_options, &option_index);
 		if (rc == -1)
 			break;
 
 		switch (rc) {
+		case 'f':
+			flowmap_file = optarg;
+			break;
 		case 'v':
 			velocity_field_file = optarg;
 			break;
@@ -96,9 +116,34 @@ int main(int argc, char *argv[])
 	if (!velocity_field_file)
 		usage("velocity_field_file required");
 
+	/* Allocate a ton of memory. We allocate these rather than
+	 * declaring them statically because if DIM is too large, the
+	 * static data will not fit into the .bss (see https://en.wikipedia.org/wiki/.bss)
+	 */
+	vf = calloc(1, sizeof(*vf));
+	fm = calloc(1, sizeof(*fm));
+
 	rc = restore_velocity_field(velocity_field_file, vf);
 	if (rc)
 		return rc;
+
+	sphere = mesh_unit_spherified_cube(SPHERE_SUBDIVISIONS);
+
+	/* Transform the velocity field into a tangent space flowmap */
+	for (f = 0; f < 6; f++) {
+		for (i = 0 ; i < VFDIM; i++) {
+			for (j = 0; j < VFDIM; j++) {
+				union vec3 tangent, bitangent, normal;
+				union vec2 output;
+				int vindex = mesh_find_nearest_cube_vertex_on_face(sphere, f, SPHERE_SUBDIVISIONS);
+				mesh_get_tbn_from_vertex(sphere, vindex, &tangent, &bitangent, &normal);
+				transform_world_vector_to_tangent_space(&vf->v[f][i][j], &tangent, &bitangent, &normal, &output);
+				fm->v[f][i][j] = output;
+			}
+		}
+	}
+
+	render_flowmap_to_png(fm, flowmap_file);
 
 	return 0;	
 }

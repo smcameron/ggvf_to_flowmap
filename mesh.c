@@ -2565,3 +2565,14 @@ void mesh_set_mikktspace_tangents_and_bitangents(struct mesh *m)
 	mikktspace_context.m_pUserData = m;
 	genTangSpaceDefault(&mikktspace_context);
 }
+
+void mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal)
+{
+	/* TODO: implement this */
+}
+
+int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions)
+{
+	/* TODO: implement this */
+}
+
