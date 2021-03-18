@@ -8,6 +8,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "png_utils.h"
 #include "quat.h"
@@ -152,6 +153,7 @@ static void render_flowmap_face_to_png(int face, struct flowmap *fm, char *flowm
 	rc = png_utils_write_png_image(flowmap_file, image, VFDIM, VFDIM, 1, 0);
 	if (!rc)
 		fprintf(stderr, "Failed to write png file %s\n", flowmap_file);
+	free(image);
 }
 
 static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
@@ -165,11 +167,40 @@ static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
 	}
 }
 
+static double find_scale_factor(struct velocity_field *vf, int dim)
+{
+	int f, i, j;
+
+	double maxv = 0.0;
+
+	for (f = 0; f < 6; f++) {
+		for (i = 0; i < dim; i++) {
+			for (j = 0; j < dim; j++) {
+				double d = vec3_magnitude2(&vf->v[f][i][j]);
+				if (maxv < d)
+					maxv = d;
+			}
+		}
+	}
+	return 1.0 / sqrt(maxv);
+}
+
+static void scale_velocity_field(struct velocity_field *vf, double scale_factor, int dim)
+{
+	int f, i, j;
+
+	for (f = 0; f < 6; f++)
+		for (i = 0; i < dim; i++)
+			for (j = 0; j < dim; j++)
+				vec3_mul_self(&vf->v[f][i][j], scale_factor);
+}
+
 int main(int argc, char *argv[])
 {
 	int rc, f, i, j;
 	int64_t percent, old_percent;
 	int64_t count;
+	double scale_factor;
 
 	while (1) {
 
@@ -205,6 +236,8 @@ int main(int argc, char *argv[])
 	rc = restore_velocity_field(velocity_field_file, vf);
 	if (rc)
 		return rc;
+	scale_factor = find_scale_factor(vf, VFDIM);
+	scale_velocity_field(vf, scale_factor, VFDIM);
 
 	sphere = mesh_unit_spherified_cube(SPHERE_SUBDIVISIONS);
 
@@ -234,6 +267,9 @@ int main(int argc, char *argv[])
 	}
 
 	render_flowmap_to_png(fm, flowmap_file);
+
+	free(fm);
+	free(vf);
 
 	return 0;	
 }
