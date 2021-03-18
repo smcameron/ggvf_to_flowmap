@@ -78,6 +78,48 @@ static int restore_velocity_field(char *filename, struct velocity_field *vf)
 	return 0;
 }
 
+/* convert from cubemap coords to cartesian coords on surface of sphere */
+static union vec3 fij_to_xyz(int f, int i, int j, const int dim)
+{
+	union vec3 answer;
+
+	switch (f) {
+	case 0:
+		answer.v.x = (float) (i - dim / 2) / (float) dim;
+		answer.v.y = -(float) (j - dim / 2) / (float) dim;
+		answer.v.z = 0.5;
+		break;
+	case 1:
+		answer.v.x = 0.5;
+		answer.v.y = -(float) (j - dim / 2) / (float) dim;
+		answer.v.z = -(float) (i - dim / 2) / (float) dim;
+		break;
+	case 2:
+		answer.v.x = -(float) (i - dim / 2) / (float) dim;
+		answer.v.y = -(float) (j - dim / 2) / (float) dim;
+		answer.v.z = -0.5;
+		break;
+	case 3:
+		answer.v.x = -0.5;
+		answer.v.y = -(float) (j - dim / 2) / (float) dim;
+		answer.v.z = (float) (i - dim / 2) / (float) dim;
+		break;
+	case 4:
+		answer.v.x = (float) (i - dim / 2) / (float) dim;
+		answer.v.y = 0.5;
+		answer.v.z = (float) (j - dim / 2) / (float) dim;
+		break;
+	case 5:
+		answer.v.x = (float) (i - dim / 2) / (float) dim;
+		answer.v.y = -0.5;
+		answer.v.z = -(float) (j - dim / 2) / (float) dim;
+		break;
+	}
+	vec3_normalize_self(&answer);
+	return answer;
+}
+
+
 static void transform_world_vector_to_tangent_space(union vec3 *world_space_vec,
 		union vec3 *tangent, union vec3 *bitangent, union vec3 *normal,
 		union vec2 *tangent_space_output)
@@ -135,7 +177,8 @@ int main(int argc, char *argv[])
 			for (j = 0; j < VFDIM; j++) {
 				union vec3 tangent, bitangent, normal;
 				union vec2 output;
-				int vindex = mesh_find_nearest_cube_vertex_on_face(sphere, f, SPHERE_SUBDIVISIONS);
+				union vec3 position = fij_to_xyz(f, i, j, VFDIM);
+				int vindex = mesh_find_nearest_cube_vertex_on_face(sphere, f, SPHERE_SUBDIVISIONS, &position);
 				mesh_get_tbn_from_vertex(sphere, vindex, &tangent, &bitangent, &normal);
 				transform_world_vector_to_tangent_space(&vf->v[f][i][j], &tangent, &bitangent, &normal, &output);
 				fm->v[f][i][j] = output;

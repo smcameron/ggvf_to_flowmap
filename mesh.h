@@ -4,20 +4,20 @@
         Copyright (C) 2010 Stephen M. Cameron
 	Author: Stephen M. Cameron
 
-        This file is part of Spacenerds In Space.
+        This file is part of ggvf_to_flowmap.
 
-        Spacenerds in Space is free software; you can redistribute it and/or modify
+        ggvf_to_flowmap is free software; you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
         the Free Software Foundation; either version 2 of the License, or
         (at your option) any later version.
 
-        Spacenerds in Space is distributed in the hope that it will be useful,
+        ggvf_to_flowmap is distributed in the hope that it will be useful,
         but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
         GNU General Public License for more details.
 
         You should have received a copy of the GNU General Public License
-        along with Spacenerds in Space; if not, write to the Free Software
+        along with ggvf_to_flowmap; if not, write to the Free Software
         Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
@@ -119,7 +119,7 @@ GLOBAL int mesh_nearest_vertex(struct mesh *m, float x, float y, float z, float 
 GLOBAL void mesh_aabb(struct mesh *m, float *minx, float *miny, float *minz, float *maxx, float *maxy, float *maxz);
 
 GLOBAL void mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal);
-GLOBAL int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions);
+GLOBAL int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions, union vec3 *pos);
 
 
 

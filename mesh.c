@@ -2571,8 +2571,32 @@ void mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tange
 	/* TODO: implement this */
 }
 
-int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions)
+int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions, union vec3 *pos)
 {
-	/* TODO: implement this */
+	int i, first, last;
+	struct vertex *v;
+	double dist = 1e20;
+	int candidate = -1;
+
+	first = face * (subdivisions + 1) * (subdivisions + 1);
+	last = (face + 1) * (subdivisions + 1) * (subdivisions + 1);
+
+	if (first < 0 || first >= sphere->nvertices || last < first || last > sphere->nvertices)
+		return -1;
+
+	for (i = 0; i < last; i++) {
+		v = &sphere->v[i];
+		union vec3 vpos;
+
+		vpos.v.x = v->x;
+		vpos.v.y = v->y;
+		vpos.v.z = v->z;
+		double d = vec3_dist_sqrd(&vpos, pos);
+		if (candidate == -1 || d < dist) {
+			dist = d;
+			candidate = i;
+		}
+	}
+	return candidate;
 }
 
