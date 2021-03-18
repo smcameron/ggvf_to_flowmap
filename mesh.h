@@ -118,7 +118,7 @@ GLOBAL int mesh_nearest_vertex(struct mesh *m, float x, float y, float z, float 
 /* Return axis aligned bounding box for a mesh in min[x,y,z], max[x,y,z] */
 GLOBAL void mesh_aabb(struct mesh *m, float *minx, float *miny, float *minz, float *maxx, float *maxy, float *maxz);
 
-GLOBAL void mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal);
+GLOBAL int mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal);
 GLOBAL int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions, union vec3 *pos);
 
 

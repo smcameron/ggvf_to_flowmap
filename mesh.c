@@ -2566,9 +2566,27 @@ void mesh_set_mikktspace_tangents_and_bitangents(struct mesh *m)
 	genTangSpaceDefault(&mikktspace_context);
 }
 
-void mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal)
+int mesh_get_tbn_from_vertex(struct mesh *sphere, int vindex, union vec3 *tangent, union vec3 *bitangent, union vec3 *normal)
 {
-	/* TODO: implement this */
+	int i, j;
+
+	for (i = 0; i < sphere->ntriangles; i++) {
+		for (j = 0; j < 3; j++) {
+			if (sphere->t[i].v[j] == &sphere->v[vindex]) {
+				tangent->v.x = sphere->t[i].vtangent[j].x;
+				tangent->v.y = sphere->t[i].vtangent[j].y;
+				tangent->v.z = sphere->t[i].vtangent[j].z;
+				bitangent->v.x = sphere->t[i].vbitangent[j].x;
+				bitangent->v.y = sphere->t[i].vbitangent[j].y;
+				bitangent->v.z = sphere->t[i].vbitangent[j].z;
+				normal->v.x = sphere->t[i].vnormal[j].x;
+				normal->v.y = sphere->t[i].vnormal[j].y;
+				normal->v.z = sphere->t[i].vnormal[j].z;
+				return 0;
+			}
+		}
+	}
+	return -1;
 }
 
 int mesh_find_nearest_cube_vertex_on_face(struct mesh *sphere, int face, int subdivisions, union vec3 *pos)

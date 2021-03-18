@@ -189,7 +189,9 @@ int main(int argc, char *argv[])
 				union vec2 output;
 				union vec3 position = fij_to_xyz(f, i, j, VFDIM);
 				int vindex = mesh_find_nearest_cube_vertex_on_face(sphere, f, SPHERE_SUBDIVISIONS, &position);
-				mesh_get_tbn_from_vertex(sphere, vindex, &tangent, &bitangent, &normal);
+				rc = mesh_get_tbn_from_vertex(sphere, vindex, &tangent, &bitangent, &normal);
+				if (rc)
+					printf("Failed to get TBN from vertex %d of sphere\n", vindex);
 				transform_world_vector_to_tangent_space(&vf->v[f][i][j], &tangent, &bitangent, &normal, &output);
 				fm->v[f][i][j] = output;
 				count++;
