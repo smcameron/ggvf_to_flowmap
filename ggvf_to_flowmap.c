@@ -125,7 +125,8 @@ static void transform_world_vector_to_tangent_space(union vec3 *world_space_vec,
 		union vec3 *tangent, union vec3 *bitangent, union vec3 *normal,
 		union vec2 *tangent_space_output)
 {
-	/* TODO: implement this */
+	tangent_space_output->v.x = vec3_dot(world_space_vec, tangent);
+	tangent_space_output->v.y = vec3_dot(world_space_vec, bitangent);
 }
 
 static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
