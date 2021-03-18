@@ -151,7 +151,7 @@ static void render_flowmap_face_to_png(int face, struct flowmap *fm, char *flowm
 		}
 	}
 	rc = png_utils_write_png_image(flowmap_file, image, VFDIM, VFDIM, 1, 0);
-	if (!rc)
+	if (rc)
 		fprintf(stderr, "Failed to write png file %s\n", flowmap_file);
 	free(image);
 }
