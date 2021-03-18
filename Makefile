@@ -51,7 +51,7 @@ MYCFLAGS=-DPREFIX=${PREFIX} ${DEBUGFLAG} ${PROFILEFLAG} ${OPTIMIZEFLAG}\
 
 all:	ggvf_to_flowmap
 
-OBJS=ggvf_to_flowmap.o quat.o mtwist.o mathutils.o mikktspace/mikktspace.o
+OBJS=ggvf_to_flowmap.o quat.o mtwist.o mathutils.o mikktspace/mikktspace.o mesh.o matrix.o vec4.o open-simplex-noise.o
 
 GGLIBS=-lm ${LRTLIB} -lpng
 GGLINK=$(ECHO) '  LINK' $@ && $(CC) ${MYCFLAGS} -o $@ ${OBJS} ${GGLIBS} $(LDFLAGS)
