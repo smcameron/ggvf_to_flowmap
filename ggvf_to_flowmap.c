@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include "quat.h"
 #include "mesh.h"
@@ -135,6 +136,8 @@ static void render_flowmap_to_png(struct flowmap *fm, char *flowmap_file)
 int main(int argc, char *argv[])
 {
 	int rc, f, i, j;
+	int64_t percent, old_percent;
+	int64_t count;
 
 	while (1) {
 
@@ -172,8 +175,15 @@ int main(int argc, char *argv[])
 	sphere = mesh_unit_spherified_cube(SPHERE_SUBDIVISIONS);
 
 	/* Transform the velocity field into a tangent space flowmap */
+	old_percent = -1;
+	count = 0;
 	for (f = 0; f < 6; f++) {
 		for (i = 0 ; i < VFDIM; i++) {
+			percent = (int64_t) (100.0 * count / (6 * VFDIM * VFDIM));
+			if (old_percent != percent) {
+				printf("%5.1f%% complete\n", (float) percent);
+				old_percent = percent;
+			}
 			for (j = 0; j < VFDIM; j++) {
 				union vec3 tangent, bitangent, normal;
 				union vec2 output;
@@ -182,6 +192,7 @@ int main(int argc, char *argv[])
 				mesh_get_tbn_from_vertex(sphere, vindex, &tangent, &bitangent, &normal);
 				transform_world_vector_to_tangent_space(&vf->v[f][i][j], &tangent, &bitangent, &normal, &output);
 				fm->v[f][i][j] = output;
+				count++;
 			}
 		}
 	}
