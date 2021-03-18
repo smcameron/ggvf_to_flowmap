@@ -143,7 +143,7 @@ static void render_flowmap_face_to_png(int face, struct flowmap *fm, char *flowm
 			v = &fm->v[face][i][j];
 			x = (0.5 * v->v.x + 0.5);
 			y = (0.5 * v->v.y + 0.5);
-			p = 4 * (j + VFDIM * i);
+			p = 4 * (i + VFDIM * j);
 			image[p] = (int) (255.0f * x) & 0xff;
 			image[p + 1] = (int) (255.0f * y) & 0xff;
 			image[p + 2] = 0;
